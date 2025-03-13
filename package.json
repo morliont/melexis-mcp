@@ -22,7 +22,7 @@
     "automation",
     "sse"
   ],
-  "author": "Kevin Meyvaert",
+  "author": "Original by Kevin Meyvaert, modified by Thijs Morlion",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.0",
