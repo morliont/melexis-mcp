@@ -1,22 +1,23 @@
 import * as dotenv from 'dotenv';
-import { AzureDevOpsServer } from './server';
-import { AzureDevOpsConfig } from './types/config';
+import { AtlassianServer } from './server';
+import { AtlassianConfig } from './types/config';
 import { SSEManager } from './sse-server';
 
 // Load environment variables
 dotenv.config();
 
 // Log version info
-console.log('Azure DevOps MCP Server - Starting up');
+console.log('Atlassian MCP Server - Starting up');
 // Skip version logging to avoid linter errors
 console.log('Starting server...');
 
 // Create the server configuration from environment variables
-const config: AzureDevOpsConfig = {
-  organizationUrl: process.env.AZURE_DEVOPS_ORG_URL || '',
-  personalAccessToken: process.env.AZURE_DEVOPS_PAT || '',
-  defaultProject: process.env.AZURE_DEVOPS_DEFAULT_PROJECT,
-  apiVersion: process.env.AZURE_DEVOPS_API_VERSION,
+const config: AtlassianConfig = {
+  instanceUrl: process.env.ATLASSIAN_INSTANCE_URL || '',
+  apiToken: process.env.ATLASSIAN_API_TOKEN || '',
+  email: process.env.ATLASSIAN_EMAIL || '',
+  defaultProject: process.env.ATLASSIAN_DEFAULT_PROJECT,
+  apiVersion: process.env.ATLASSIAN_API_VERSION,
 };
 
 // Get server configuration
@@ -24,31 +25,38 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const host = process.env.HOST || '0.0.0.0';
 
 // Validate the required configuration
-if (!config.organizationUrl) {
-  console.error('Error: AZURE_DEVOPS_ORG_URL environment variable is required');
+if (!config.instanceUrl) {
+  console.error(
+    'Error: ATLASSIAN_INSTANCE_URL environment variable is required',
+  );
   process.exit(1);
 }
 
-if (!config.personalAccessToken) {
-  console.error('Error: AZURE_DEVOPS_PAT environment variable is required');
+if (!config.apiToken) {
+  console.error('Error: ATLASSIAN_API_TOKEN environment variable is required');
+  process.exit(1);
+}
+
+if (!config.email) {
+  console.error('Error: ATLASSIAN_EMAIL environment variable is required');
   process.exit(1);
 }
 
 // Create and initialize the server
-const server = new AzureDevOpsServer(config);
+const server = new AtlassianServer(config);
 
 // Run the server
 async function runServer() {
-  // Test the connection to Azure DevOps
+  // Test the connection to Atlassian
   const connectionSuccessful = await server.testConnection();
 
   if (!connectionSuccessful) {
-    console.error('Error: Failed to connect to Azure DevOps API');
+    console.error('Error: Failed to connect to Atlassian API');
     process.exit(1);
   }
 
-  console.log('Successfully connected to Azure DevOps API');
-  console.log(`Organization URL: ${config.organizationUrl}`);
+  console.log('Successfully connected to Atlassian API');
+  console.log(`Instance URL: ${config.instanceUrl}`);
 
   if (config.defaultProject) {
     console.log(`Default Project: ${config.defaultProject}`);
@@ -58,7 +66,7 @@ async function runServer() {
   const sseManager = new SSEManager(server, port, host);
   await sseManager.start();
 
-  console.log('Azure DevOps MCP Server running with SSE');
+  console.log('Atlassian MCP Server running with SSE');
   console.log(`Server is available at http://${host}:${port}`);
   console.log(
     `Connect to http://${host}:${port}/sse to establish an SSE connection`,

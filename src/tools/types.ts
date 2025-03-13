@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as azdev from 'azure-devops-node-api';
-import { AzureDevOpsConfig } from '../types/config';
+import { AxiosInstance } from 'axios';
+import { AtlassianConfig } from '../types/config';
 
 /**
  * Interface for MCP tools
@@ -20,13 +20,13 @@ export interface McpTool {
    * Register the tool with the MCP server
    *
    * @param server The MCP server
-   * @param connection The Azure DevOps connection
-   * @param config The Azure DevOps configuration
+   * @param connection The Atlassian API connection
+   * @param config The Atlassian configuration
    */
   register(
     server: McpServer,
-    connection: azdev.WebApi | null,
-    config: AzureDevOpsConfig,
+    connection: AxiosInstance | null,
+    config: AtlassianConfig,
   ): void;
 }
 
@@ -49,13 +49,13 @@ export class ToolRegistry {
    * Register all tools with the MCP server
    *
    * @param server The MCP server
-   * @param connection The Azure DevOps connection
-   * @param config The Azure DevOps configuration
+   * @param connection The Atlassian API connection
+   * @param config The Atlassian configuration
    */
   public registerAllTools(
     server: McpServer,
-    connection: azdev.WebApi | null,
-    config: AzureDevOpsConfig,
+    connection: AxiosInstance | null,
+    config: AtlassianConfig,
   ): void {
     this.tools.forEach((tool) => tool.register(server, connection, config));
   }

@@ -1,33 +1,33 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as azdev from 'azure-devops-node-api';
-import { AzureDevOpsConfig } from './types/config';
+import axios from 'axios';
+import { AtlassianConfig } from './types/config';
 import { getAllTools } from './tools';
 import type { ToolRegistry } from './tools';
 import { version } from '../package.json';
 
 /**
- * Azure DevOps MCP Server
+ * Atlassian MCP Server
  *
- * Implements a Model Context Protocol server for Azure DevOps
+ * Implements a Model Context Protocol server for Atlassian products
  */
-export class AzureDevOpsServer {
+export class AtlassianServer {
   private server: McpServer;
-  private config: AzureDevOpsConfig;
-  private connection: azdev.WebApi | null = null;
+  private config: AtlassianConfig;
+  private axiosInstance: any = null;
   private serverInfo: { name: string; version: string };
   private toolRegistry: ToolRegistry;
 
   /**
-   * Create a new Azure DevOps MCP Server
+   * Create a new Atlassian MCP Server
    *
-   * @param config The Azure DevOps configuration
+   * @param config The Atlassian configuration
    */
-  constructor(config: AzureDevOpsConfig) {
+  constructor(config: AtlassianConfig) {
     this.validateConfig(config);
     this.config = config;
 
     this.serverInfo = {
-      name: 'azure-devops-mcp',
+      name: 'atlassian-mcp',
       version: version,
     };
 
@@ -40,7 +40,7 @@ export class AzureDevOpsServer {
     // Initialize the tool registry
     this.toolRegistry = getAllTools();
 
-    // Initialize the Azure DevOps connection
+    // Initialize the Atlassian connection
     this.initializeConnection();
 
     // Register the tools
@@ -48,50 +48,56 @@ export class AzureDevOpsServer {
   }
 
   /**
-   * Validate the Azure DevOps configuration
+   * Validate the Atlassian configuration
    *
    * @param config Configuration to validate
    * @throws Error if configuration is invalid
    */
-  private validateConfig(config: AzureDevOpsConfig): void {
-    if (!config.organizationUrl) {
-      throw new Error('Organization URL is required');
+  private validateConfig(config: AtlassianConfig): void {
+    if (!config.instanceUrl) {
+      throw new Error('Instance URL is required');
     }
 
-    if (!config.personalAccessToken) {
-      throw new Error('Personal Access Token is required');
+    if (!config.apiToken) {
+      throw new Error('API Token is required');
     }
 
-    // Validate organization URL format
+    if (!config.email) {
+      throw new Error('Email is required');
+    }
+
+    // Validate instance URL format
     try {
-      const url = new URL(config.organizationUrl);
+      const url = new URL(config.instanceUrl);
       if (!url.hostname) {
-        throw new Error('Invalid organization URL');
+        throw new Error('Invalid instance URL');
       }
     } catch (error) {
-      throw new Error('Invalid organization URL format');
+      throw new Error('Invalid instance URL format');
     }
   }
 
   /**
-   * Initialize the Azure DevOps connection
+   * Initialize the Atlassian connection
    */
   private initializeConnection(): void {
     try {
-      // Create authentication handler
-      const authHandler = azdev.getPersonalAccessTokenHandler(
-        this.config.personalAccessToken,
-      );
-
-      // Create connection
-      this.connection = new azdev.WebApi(
-        this.config.organizationUrl,
-        authHandler,
-      );
-      console.log('Azure DevOps connection initialized');
+      // Create axios instance with authentication
+      this.axiosInstance = axios.create({
+        baseURL: this.config.instanceUrl,
+        auth: {
+          username: this.config.email,
+          password: this.config.apiToken,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      });
+      console.log('Atlassian connection initialized');
     } catch (error) {
-      console.error('Failed to initialize Azure DevOps connection:', error);
-      this.connection = null;
+      console.error('Failed to initialize Atlassian connection:', error);
+      this.axiosInstance = null;
     }
   }
 
@@ -101,32 +107,34 @@ export class AzureDevOpsServer {
   private registerTools(): void {
     this.toolRegistry.registerAllTools(
       this.server,
-      this.connection,
+      this.axiosInstance,
       this.config,
     );
   }
 
   /**
-   * Test the connection to Azure DevOps
+   * Test the connection to Atlassian
    *
    * @returns A promise that resolves to true if the connection is successful
    */
   public async testConnection(): Promise<boolean> {
     try {
-      if (!this.connection) {
+      if (!this.axiosInstance) {
         return false;
       }
 
-      // Get the Core API
-      const coreApi = await this.connection.getCoreApi();
+      // Test connection by getting accessible resources
+      const response = await this.axiosInstance.get('/rest/api/3/myself');
 
-      // Try to get the first project
-      const projects = await coreApi.getProjects();
-      console.log(
-        `Connection test successful. Found ${projects.length} projects.`,
-      );
+      if (response.status === 200) {
+        console.log(
+          'Connection test successful. Connected as:',
+          response.data.displayName,
+        );
+        return true;
+      }
 
-      return true;
+      return false;
     } catch (error) {
       console.error('Connection test failed:', error);
       return false;

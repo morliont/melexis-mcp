@@ -1,6 +1,6 @@
 import { getProjectTools } from './project';
 import { getWorkItemTools } from './workItem';
-import { getRepositoryTools } from './repository';
+import { getConfluenceTools } from './confluence';
 import { ToolRegistry } from './types';
 
 export { ToolRegistry } from './types';
@@ -16,7 +16,7 @@ export function getAllTools(): ToolRegistry {
   // Register all tools
   getProjectTools().forEach((tool) => registry.registerTool(tool));
   getWorkItemTools().forEach((tool) => registry.registerTool(tool));
-  getRepositoryTools().forEach((tool) => registry.registerTool(tool));
+  getConfluenceTools().forEach((tool) => registry.registerTool(tool));
 
   return registry;
 }

@@ -1,24 +1,29 @@
 /**
- * Azure DevOps configuration type definition
+ * Atlassian configuration type definition
  */
-export interface AzureDevOpsConfig {
+export interface AtlassianConfig {
   /**
-   * The Azure DevOps organization URL (e.g., https://dev.azure.com/organization)
+   * The Atlassian Cloud instance URL (e.g., https://your-domain.atlassian.net)
    */
-  organizationUrl: string;
-  
+  instanceUrl: string;
+
   /**
-   * Personal Access Token for authentication
+   * API token for authentication
    */
-  personalAccessToken: string;
-  
+  apiToken: string;
+
   /**
-   * Optional default project to use when not specified
+   * Email address associated with the API token
+   */
+  email: string;
+
+  /**
+   * Optional default Jira project to use when not specified
    */
   defaultProject?: string;
-  
+
   /**
    * Optional API version to use (defaults to latest)
    */
   apiVersion?: string;
-} 
+}

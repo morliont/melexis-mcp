@@ -1,54 +1,53 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as azdev from 'azure-devops-node-api';
+import { AxiosInstance } from 'axios';
 import { McpTool } from '../types';
 
 /**
- * Tool for listing all projects in Azure DevOps
+ * Tool for listing all projects in Jira
  */
 export class ListProjectsTool implements McpTool {
   public name = 'list_projects';
-  public description = 'List all projects';
+  public description = 'List all Jira projects';
 
   /**
    * Register the tool with the MCP server
    *
    * @param server The MCP server
-   * @param connection The Azure DevOps connection
+   * @param connection The Atlassian API connection
    */
-  public register(server: McpServer, connection: azdev.WebApi | null): void {
+  public register(server: McpServer, connection: AxiosInstance | null): void {
     server.tool(this.name, {}, async (_args, _extras) => {
       try {
         if (!connection) {
-          throw new Error('No connection to Azure DevOps');
+          throw new Error('No connection to Atlassian API');
         }
 
-        // Get the Core API
-        const coreApi = await connection.getCoreApi();
-
-        // Fetch the projects
-        const projects = await coreApi.getProjects();
+        // Fetch the projects from Jira API
+        const response = await connection.get('/rest/api/3/project');
+        const projects = response.data;
 
         if (!projects || projects.length === 0) {
           return {
             content: [
               {
                 type: 'text',
-                text: 'No projects found in this organization.',
+                text: 'No projects found in this Jira instance.',
               },
             ],
           };
         }
 
         // Format the projects list
-        const formattedProjects = projects.map((project) => {
+        const formattedProjects = projects.map((project: any) => {
           return {
             id: project.id,
+            key: project.key,
             name: project.name,
             description: project.description,
-            state: project.state,
-            visibility: project.visibility,
-            lastUpdateTime: project.lastUpdateTime,
-            url: project.url,
+            projectTypeKey: project.projectTypeKey,
+            simplified: project.simplified,
+            style: project.style,
+            url: project.self,
           };
         });
 
@@ -56,17 +55,15 @@ export class ListProjectsTool implements McpTool {
           content: [
             {
               type: 'text',
-              text: `# Projects\n\nFound ${projects.length} projects in this organization:\n\n${formattedProjects
+              text: `# Projects\n\nFound ${projects.length} projects in this Jira instance:\n\n${formattedProjects
                 .map(
-                  (p) =>
-                    `## ${p.name}\n**ID**: ${p.id}\n**Description**: ${
+                  (p: any) =>
+                    `## ${p.name} (${p.key})\n**ID**: ${p.id}\n**Description**: ${
                       p.description || 'No description'
-                    }\n**State**: ${p.state}\n**Visibility**: ${
-                      p.visibility
-                    }\n**Last Updated**: ${
-                      p.lastUpdateTime
-                        ? new Date(p.lastUpdateTime).toLocaleString()
-                        : 'Unknown'
+                    }\n**Type**: ${p.projectTypeKey}\n**Style**: ${
+                      p.style
+                    }\n**Simplified**: ${
+                      p.simplified ? 'Yes' : 'No'
                     }\n**URL**: ${p.url || 'N/A'}\n`,
                 )
                 .join('\n')}`,

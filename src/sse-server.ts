@@ -1,12 +1,12 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
-import { AzureDevOpsServer } from './server';
+import { AtlassianServer } from './server';
 
 /**
- * Class that manages SSE connections for the Azure DevOps MCP server
+ * Class that manages SSE connections for the Atlassian MCP server
  */
 export class SSEManager {
-  private server: AzureDevOpsServer;
+  private server: AtlassianServer;
   private httpServer: ReturnType<typeof createServer>;
   private sessions: Map<string, SSEServerTransport> = new Map();
   private port: number;
@@ -15,12 +15,12 @@ export class SSEManager {
   /**
    * Create a new SSE manager
    *
-   * @param server The Azure DevOps server instance
+   * @param server The Atlassian server instance
    * @param port The port to listen on
    * @param host The host to listen on
    */
   constructor(
-    server: AzureDevOpsServer,
+    server: AtlassianServer,
     port: number = 3000,
     host: string = '0.0.0.0',
   ) {
@@ -174,17 +174,17 @@ export class SSEManager {
       res.end(`
         <html>
           <head>
-            <title>Azure DevOps MCP Server</title>
+            <title>Atlassian MCP Server</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-              h1 { color: #0078d4; }
+              h1 { color: #0052CC; }
               pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
               .container { max-width: 800px; margin: 0 auto; }
             </style>
           </head>
           <body>
             <div class="container">
-              <h1>Azure DevOps MCP Server</h1>
+              <h1>Atlassian MCP Server</h1>
               <p>Server is running. Connect to <a href="/sse">/sse</a> to establish an SSE connection.</p>
               <p>Server status: <a href="/health">/health</a></p>
               <p>Current sessions: ${this.sessions.size}</p>

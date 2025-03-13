@@ -1,28 +1,28 @@
-# Azure DevOps MCP (Model Context Protocol)
+# Atlassian MCP (Model Context Protocol)
 
-This project serves as a reference server implementation for the Model Context Protocol (MCP) integrated with Azure DevOps. It enables AI assistants to interact with Azure DevOps resources and perform operations programmatically.
+This project serves as a reference server implementation for the Model Context Protocol (MCP) integrated with Atlassian products (Jira, Confluence). It enables AI assistants to interact with Atlassian resources and perform operations programmatically.
 
 ## Features
 
-- Azure DevOps integration using official Node.js SDK
+- Atlassian API integration using REST API
 - Support for Model Context Protocol (MCP)
 - Project management operations
-- Work item management
-- Repository operations
-- Code search capabilities
+- Issue management
+- Content operations
+- Search capabilities
 
 ## Prerequisites
 
 - Node.js (v18 or higher recommended)
-- Azure DevOps account with appropriate permissions
-- Azure DevOps Personal Access Token (PAT)
+- Atlassian Cloud account with appropriate permissions
+- Atlassian API Token
 
 ## Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd azure-devops-mcp
+cd atlassian-mcp
 ```
 
 2. Install dependencies:
@@ -53,8 +53,9 @@ Make sure you use the path `http://localhost:3000/sse`. You can change ports by 
 
 The following environment variables need to be configured in your `.env` file:
 
-- `AZURE_DEVOPS_ORG_URL`: Your Azure DevOps organization URL
-- `AZURE_DEVOPS_PAT`: Personal Access Token for Azure DevOps
+- `ATLASSIAN_INSTANCE_URL`: Your Atlassian instance URL (e.g., https://your-domain.atlassian.net)
+- `ATLASSIAN_API_TOKEN`: API Token for Atlassian
+- `ATLASSIAN_EMAIL`: Email associated with your Atlassian account
 - Additional configuration variables as specified in `.env.example`
 
 ## Available Scripts
