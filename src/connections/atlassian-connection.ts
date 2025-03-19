@@ -1,50 +1,37 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import axios from 'axios';
-import { AtlassianConfig } from './types/config';
-import { getAllTools } from './tools';
-import type { ToolRegistry } from './tools';
-import { version } from '../package.json';
+import { AtlassianConfig } from '../types/config';
+import { getAllAtlassianTools } from '../tools';
+import type { McpTool } from '../tools/types';
+import { BaseConnection } from './base-connection';
+import { version } from '../../package.json';
 
 /**
- * Atlassian MCP Server
+ * Atlassian Connection
  *
- * Implements a Model Context Protocol server for Atlassian products
+ * Handles connection and interaction with Atlassian products
  */
-export class AtlassianServer {
-  private server: McpServer;
-  private config: AtlassianConfig;
-  private axiosInstance: any = null;
+export class AtlassianConnection extends BaseConnection {
   private serverInfo: { name: string; version: string };
-  private toolRegistry: ToolRegistry;
 
   /**
-   * Create a new Atlassian MCP Server
+   * Create a new Atlassian Connection
    *
    * @param config The Atlassian configuration
    */
   constructor(config: AtlassianConfig) {
+    super();
     this.validateConfig(config);
     this.config = config;
-
     this.serverInfo = {
       name: 'atlassian-mcp',
       version: version,
     };
 
-    // Initialize the MCP server
-    this.server = new McpServer({
-      name: this.serverInfo.name,
-      version: this.serverInfo.version,
-    });
-
     // Initialize the tool registry
-    this.toolRegistry = getAllTools();
+    this.toolRegistry = getAllAtlassianTools();
 
     // Initialize the Atlassian connection
     this.initializeConnection();
-
-    // Register the tools
-    this.registerTools();
   }
 
   /**
@@ -80,13 +67,13 @@ export class AtlassianServer {
   /**
    * Initialize the Atlassian connection
    */
-  private initializeConnection(): void {
+  protected initializeConnection(): void {
     try {
       // Create axios instance with authentication
       this.axiosInstance = axios.create({
         baseURL: this.config.instanceUrl,
         auth: {
-          username: this.config.email,
+          username: (this.config as AtlassianConfig).email,
           password: this.config.apiToken,
         },
         headers: {
@@ -99,17 +86,6 @@ export class AtlassianServer {
       console.error('Failed to initialize Atlassian connection:', error);
       this.axiosInstance = null;
     }
-  }
-
-  /**
-   * Register tools with the MCP server
-   */
-  private registerTools(): void {
-    this.toolRegistry.registerAllTools(
-      this.server,
-      this.axiosInstance,
-      this.config,
-    );
   }
 
   /**
@@ -142,6 +118,15 @@ export class AtlassianServer {
   }
 
   /**
+   * Get all registered tools
+   *
+   * @returns Array of registered tools
+   */
+  public getTools(): McpTool[] {
+    return this.toolRegistry.getAllTools();
+  }
+
+  /**
    * Get the name of the server
    *
    * @returns The server name
@@ -157,26 +142,5 @@ export class AtlassianServer {
    */
   public getVersion(): string {
     return this.serverInfo.version;
-  }
-
-  /**
-   * Get all registered tools
-   *
-   * @returns Array of registered tools
-   */
-  public getTools(): Array<{ name: string; description: string }> {
-    return this.toolRegistry.getAllTools();
-  }
-
-  /**
-   * Connect to a transport
-   *
-   * @param transport The transport to connect to
-   * @returns A promise that resolves when the connection is established
-   */
-  public async connect(transport: any): Promise<void> {
-    console.log('Connecting to transport...');
-    await this.server.connect(transport);
-    console.log('Connected to transport');
   }
 }

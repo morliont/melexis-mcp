@@ -1,8 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
 import { z } from 'zod';
-import { McpTool } from '../types';
-import { AtlassianConfig } from '../../types/config';
+import { McpTool } from '../../types';
+import { AtlassianConfig } from '../../../types/config';
 
 /**
  * Tool for getting project details from Jira
@@ -26,7 +26,9 @@ export class GetProjectTool implements McpTool {
     server.tool(
       this.name,
       {
-        projectIdOrKey: z.string().describe('The ID or key of the Jira project'),
+        projectIdOrKey: z
+          .string()
+          .describe('The ID or key of the Jira project'),
       },
       async (args, _extras) => {
         try {

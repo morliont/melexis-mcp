@@ -1,14 +1,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
 import { z } from 'zod';
-import { McpTool } from '../types';
-import { AtlassianConfig } from '../../types/config';
+import { McpTool } from '../../types';
+import { AtlassianConfig } from '../../../types/config';
 
 /**
  * Tool for querying issues in Jira
  */
 export class QueryWorkItemsTool implements McpTool {
-  public name = 'query_work_items';
+  public name = 'query_jira_work_items';
   public description = 'Query Jira issues with filters';
 
   /**

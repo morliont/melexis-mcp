@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
-import { AtlassianConfig } from '../types/config';
+import { AtlassianConfig, GitlabConfig } from '../types/config';
 
 /**
  * Interface for MCP tools
@@ -26,7 +26,7 @@ export interface McpTool {
   register(
     server: McpServer,
     connection: AxiosInstance | null,
-    config: AtlassianConfig,
+    config: AtlassianConfig | GitlabConfig,
   ): void;
 }
 
@@ -65,10 +65,7 @@ export class ToolRegistry {
    *
    * @returns Array of registered tools
    */
-  public getAllTools(): Array<{ name: string; description: string }> {
-    return this.tools.map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-    }));
+  public getAllTools(): McpTool[] {
+    return [...this.tools];
   }
 }

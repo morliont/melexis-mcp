@@ -1,12 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
-import { McpTool } from '../types';
+import { McpTool } from '../../types';
 
 /**
  * Tool for listing all projects in Jira
  */
 export class ListProjectsTool implements McpTool {
-  public name = 'list_projects';
+  public name = 'list_jira_projects';
   public description = 'List all Jira projects';
 
   /**

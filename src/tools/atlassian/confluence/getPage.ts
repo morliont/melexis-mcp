@@ -1,8 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
 import { z } from 'zod';
-import { McpTool } from '../types';
-import { AtlassianConfig } from '../../types/config';
+import { McpTool } from '../../types';
+import { AtlassianConfig } from '../../../types/config';
 
 /**
  * Tool for getting a specific Confluence page

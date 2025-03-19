@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
-import { McpTool } from '../types';
-import { AtlassianConfig } from '../../types/config';
+import { McpTool } from '../../types';
+import { AtlassianConfig } from '../../../types/config';
 
 /**
  * Tool for listing all spaces in Confluence

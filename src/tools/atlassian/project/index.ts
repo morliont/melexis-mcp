@@ -1,7 +1,6 @@
 import { ListProjectsTool } from './listProjects';
-import { GetProjectTool } from './getProject';
 
-export { ListProjectsTool, GetProjectTool };
+export { ListProjectsTool };
 
 /**
  * Get all project tools
@@ -9,5 +8,5 @@ export { ListProjectsTool, GetProjectTool };
  * @returns Array of project tools
  */
 export function getProjectTools() {
-  return [new ListProjectsTool(), new GetProjectTool()];
+  return [new ListProjectsTool()];
 }

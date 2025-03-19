@@ -1,45 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
 import { z } from 'zod';
-import { McpTool } from '../types';
-import { AtlassianConfig } from '../../types/config';
-
-/**
- * Helper function to convert ADF to plain text
- *
- * @param adfObject The Atlassian Document Format object
- * @returns Plain text representation of the ADF content
- */
-function convertAdfToText(adfObject: any): string {
-  if (!adfObject) return 'No description';
-
-  // If it's already a string, return it
-  if (typeof adfObject === 'string') return adfObject;
-
-  try {
-    // Handle ADF document structure
-    if (
-      adfObject.version &&
-      adfObject.type === 'doc' &&
-      Array.isArray(adfObject.content)
-    ) {
-      let result = '';
-
-      // Process each content node
-      for (const node of adfObject.content) {
-        result += processNode(node) + '\n';
-      }
-
-      return result.trim();
-    }
-
-    // Fallback for unknown format
-    return JSON.stringify(adfObject);
-  } catch (error) {
-    console.error('Error converting ADF to text:', error);
-    return 'Error parsing description';
-  }
-}
+import { McpTool } from '../../types';
+import { AtlassianConfig } from '../../../types/config';
 
 /**
  * Process an ADF node and its children recursively
@@ -153,10 +116,47 @@ function processListItem(node: any, prefix: string): string {
 }
 
 /**
+ * Helper function to convert ADF to plain text
+ *
+ * @param adfObject The Atlassian Document Format object
+ * @returns Plain text representation of the ADF content
+ */
+function convertAdfToText(adfObject: any): string {
+  if (!adfObject) return 'No description';
+
+  // If it's already a string, return it
+  if (typeof adfObject === 'string') return adfObject;
+
+  try {
+    // Handle ADF document structure
+    if (
+      adfObject.version &&
+      adfObject.type === 'doc' &&
+      Array.isArray(adfObject.content)
+    ) {
+      let result = '';
+
+      // Process each content node
+      for (const node of adfObject.content) {
+        result += processNode(node) + '\n';
+      }
+
+      return result.trim();
+    }
+
+    // Fallback for unknown format
+    return JSON.stringify(adfObject);
+  } catch (error) {
+    console.error('Error converting ADF to text:', error);
+    return 'Error parsing description';
+  }
+}
+
+/**
  * Tool for getting an issue from Jira
  */
 export class GetWorkItemTool implements McpTool {
-  public name = 'get_work_item';
+  public name = 'get_jira_work_item';
   public description = 'Get a Jira issue by ID or key';
 
   /**

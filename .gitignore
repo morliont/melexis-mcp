@@ -31,3 +31,7 @@ coverage/
 # Logs
 logs/
 *.log 
+
+# Folders
+.mcp/
+docs/

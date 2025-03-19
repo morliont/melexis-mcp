@@ -1,75 +1,97 @@
 import * as dotenv from 'dotenv';
-import { AtlassianServer } from './server';
-import { AtlassianConfig } from './types/config';
+import { McpCentralServer } from './central-server';
+import { CentralConfig } from './types/config';
 import { SSEManager } from './sse-server';
 
 // Load environment variables
 dotenv.config();
 
-// Log version info
-console.log('Atlassian MCP Server - Starting up');
-// Skip version logging to avoid linter errors
-console.log('Starting server...');
-
 // Create the server configuration from environment variables
-const config: AtlassianConfig = {
-  instanceUrl: process.env.ATLASSIAN_INSTANCE_URL || '',
-  apiToken: process.env.ATLASSIAN_API_TOKEN || '',
-  email: process.env.ATLASSIAN_EMAIL || '',
-  defaultProject: process.env.ATLASSIAN_DEFAULT_PROJECT,
-  apiVersion: process.env.ATLASSIAN_API_VERSION,
+const config: CentralConfig = {
+  atlassian: {
+    instanceUrl: process.env.ATLASSIAN_INSTANCE_URL || '',
+    apiToken: process.env.ATLASSIAN_API_TOKEN || '',
+    email: process.env.ATLASSIAN_EMAIL || '',
+    defaultProject: process.env.ATLASSIAN_DEFAULT_PROJECT,
+    apiVersion: process.env.ATLASSIAN_API_VERSION,
+  },
+  gitlab: {
+    instanceUrl: process.env.GITLAB_INSTANCE_URL || '',
+    apiToken: process.env.GITLAB_ACCESS_TOKEN || '',
+    defaultProject: process.env.GITLAB_DEFAULT_PROJECT,
+  },
+  port: parseInt(process.env.PORT || '3000', 10),
+  host: process.env.HOST || '0.0.0.0',
 };
 
-// Get server configuration
-const port = parseInt(process.env.PORT || '3000', 10);
-const host = process.env.HOST || '0.0.0.0';
-
 // Validate the required configuration
-if (!config.instanceUrl) {
+if (!config.atlassian.instanceUrl) {
   console.error(
     'Error: ATLASSIAN_INSTANCE_URL environment variable is required',
   );
   process.exit(1);
 }
 
-if (!config.apiToken) {
+if (!config.atlassian.apiToken) {
   console.error('Error: ATLASSIAN_API_TOKEN environment variable is required');
   process.exit(1);
 }
 
-if (!config.email) {
+if (!config.atlassian.email) {
   console.error('Error: ATLASSIAN_EMAIL environment variable is required');
   process.exit(1);
 }
 
-// Create and initialize the server
-const server = new AtlassianServer(config);
+if (!config.gitlab.instanceUrl) {
+  console.error('Error: GITLAB_INSTANCE_URL environment variable is required');
+  process.exit(1);
+}
+
+if (!config.gitlab.apiToken) {
+  console.error('Error: GITLAB_API_TOKEN environment variable is required');
+  process.exit(1);
+}
+
+// Create and initialize the central server
+const centralServer = new McpCentralServer(config);
 
 // Run the server
 async function runServer() {
-  // Test the connection to Atlassian
-  const connectionSuccessful = await server.testConnection();
+  // Test the connections
+  const connectionStatus = await centralServer.testConnections();
 
-  if (!connectionSuccessful) {
+  if (!connectionStatus.atlassian) {
     console.error('Error: Failed to connect to Atlassian API');
     process.exit(1);
   }
 
-  console.log('Successfully connected to Atlassian API');
-  console.log(`Instance URL: ${config.instanceUrl}`);
+  if (!connectionStatus.gitlab) {
+    console.error('Error: Failed to connect to Gitlab API');
+    process.exit(1);
+  }
 
-  if (config.defaultProject) {
-    console.log(`Default Project: ${config.defaultProject}`);
+  console.log('Successfully connected to Atlassian API');
+  console.log(`Instance URL: ${config.atlassian.instanceUrl}`);
+
+  console.log('Successfully connected to Gitlab API');
+  console.log(`Instance URL: ${config.gitlab.instanceUrl}`);
+
+  if (config.atlassian.defaultProject) {
+    console.log(`Default Project: ${config.atlassian.defaultProject}`);
+  }
+
+  if (config.gitlab.defaultProject) {
+    console.log(`Default Project: ${config.gitlab.defaultProject}`);
   }
 
   // Create and start the SSE manager
-  const sseManager = new SSEManager(server, port, host);
+  const sseManager = new SSEManager(centralServer, config.port, config.host);
   await sseManager.start();
 
-  console.log('Atlassian MCP Server running with SSE');
-  console.log(`Server is available at http://${host}:${port}`);
+  console.log('MCP Central Server running with SSE');
+  console.log(`Server is available at http://${config.host}:${config.port}`);
   console.log(
-    `Connect to http://${host}:${port}/sse to establish an SSE connection`,
+    `Connect to http://${config.host}:${config.port}/sse to establish an SSE connection`,
   );
 
   // Handle process termination
@@ -88,6 +110,6 @@ async function runServer() {
 
 // Start the server
 runServer().catch((error) => {
-  console.error('Fatal error in main():', error);
+  console.error('Failed to start server:', error);
   process.exit(1);
 });

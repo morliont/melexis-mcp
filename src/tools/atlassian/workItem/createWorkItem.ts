@@ -1,14 +1,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AxiosInstance } from 'axios';
 import { z } from 'zod';
-import { McpTool } from '../types';
-import { AtlassianConfig } from '../../types/config';
+import { McpTool } from '../../types';
+import { AtlassianConfig } from '../../../types/config';
 
 /**
  * Tool for creating an issue in Jira
  */
 export class CreateWorkItemTool implements McpTool {
-  public name = 'create_work_item';
+  public name = 'create_jira_work_item';
   public description = 'Create a new Jira issue';
 
   /**
