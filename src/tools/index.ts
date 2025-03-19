@@ -3,7 +3,7 @@ import { getWorkItemTools } from './atlassian/workItem';
 import { getConfluenceTools } from './atlassian/confluence';
 import { ToolRegistry } from './types';
 import { ListAllProjectsTool } from './gitlab/listAllProjects';
-
+import { CloneProjectTool } from './gitlab/cloneProject';
 export { ToolRegistry } from './types';
 
 /**
@@ -25,6 +25,7 @@ export function getAllAtlassianTools(): ToolRegistry {
 export function getAllGitlabTools(): ToolRegistry {
   const registry = new ToolRegistry();
   registry.registerTool(new ListAllProjectsTool());
+  registry.registerTool(new CloneProjectTool());
 
   return registry;
 }
